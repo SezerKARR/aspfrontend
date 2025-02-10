@@ -1,0 +1,50 @@
+.search {
+    position: relative;
+    width: 300px;
+    margin: auto;
+}
+
+.searchInputs {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px;
+    background-color: #fff;
+}
+
+.searchInputs input {
+    border: none;
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+}
+
+.searchIcon {
+    cursor: pointer;
+    padding: 5px;
+}
+
+.dataResult {
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.dataItem {
+    display: block;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    text-decoration: none;
+    color: #333;
+}
+
+.dataItem:hover {
+    background-color: #f0f0f0;
+}
+
+.dataItem p {
+    margin: 0;
+}
