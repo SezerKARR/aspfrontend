@@ -11,13 +11,18 @@ import Logo from "./Components/Logo/Logo";
 function HomePage() {
     const navigate = useNavigate();
     const [saplingCategories, setSaplingCategories] = useState([]);
-
+    const [saplings, setSaplings] = useState([]);
     useEffect(() => {
         axios.get("https://localhost:5000/api/SaplingCategory/")
             .then(response => {
                 setSaplingCategories(response.data);
             })
             .catch(Error => console.error("Error:", Error));
+        axios.get("https://localhost:5000/api/Sapling/")
+            .then(response => {
+                console.log(response.data);
+                setSaplings(response.data);
+            }).catch(Error => console.error("Error:", Error));
     }, [])
     const handleCategoryClick = (category) => {
         console.log(category);
@@ -37,7 +42,7 @@ function HomePage() {
     const ImageWithHoverEffect = ({category}) => {
         const [hovered, setHovered] = useState(false);
         console.log("hovered", category);
-       
+
 
         return (<div
             style={SharedStyles.ImageAndNameContainer}
@@ -45,7 +50,7 @@ function HomePage() {
             onMouseLeave={() => setHovered(false)}
             onClick={() => handleCategoryClick(category)}
         >
-            <img  style={SharedStyles.image(hovered)} src={category.imageUrl} alt="Sapling"/>
+            <img style={SharedStyles.image(hovered)} src={category.imageUrl} alt="Sapling"/>
             <div style={SharedStyles.textOverlay(hovered)}>{category.name}</div>
         </div>);
     };
@@ -59,7 +64,7 @@ function HomePage() {
                 height: "auto", // Yüksekliği içerik kadar olsun
                 justifyContent: "center",
                 listStyleType: "none",
-               // İçeriğe göre genişlik otomatik ayarlanacak
+                // İçeriğe göre genişlik otomatik ayarlanacak
                 maxWidth: "100%",
                 width: "auto", // Maksimum genişlik %100 olacak
                 gap: "24px",
@@ -75,10 +80,10 @@ function HomePage() {
 
         }
         return (
-            <ul style={styles.saplingList} 
-                    onMouseEnter={() => setHovered(true)}
-                    onMouseLeave={() => setHovered(false)}>
-                {saplingList.map(sapling => ( <SaplingTextWithHoverEffect sapling={sapling}/>))}
+            <ul style={styles.saplingList}
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => setHovered(false)}>
+                {saplingList.map(sapling => (<SaplingTextWithHoverEffect sapling={sapling}/>))}
             </ul>)
     }
     const SaplingTextWithHoverEffect = ({sapling}) => {
@@ -103,29 +108,133 @@ function HomePage() {
                 style={styles.container}
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
-                onClick={() => navigate(`/Sapling/${sapling.name}`, {state: {saplingId: sapling.id}})}
+                onClick={() => navigate(`/Sapling/${sapling.slug}`, {state: {saplingId: sapling.id}})}
             >
                 <li key={sapling.id} style={styles.saplingsName}>{sapling.name}</li>
             </div>
 
         );
     };
-    
+    const getPriceRange = (sapling) => {
+        console.log(sapling);
+        if (!sapling.saplingHeightReadDtos || sapling.saplingHeightReadDtos.length === 0) {
+            return "Fiyat bilgisi yok";
+        }
+
+        const prices = sapling.saplingHeightReadDtos.map(height => height.saplingMoney);
+        const validPrices = prices.filter(price => price > 0).sort((a, b) => a - b);
+        const minPrice = validPrices.length > 0 ? validPrices[0] : null;
+
+        console.log(prices);
+        const maxPrice = Math.max(...prices);
+
+        return minPrice === maxPrice ? `${minPrice} TL` : `${minPrice} - ${maxPrice} TL`;
+    };
+    const HomeSapling = ({ sapling }) => {
+        const [hoveredElement, setHoveredElement] = useState(null);
+        const [hovered, setHovered] = useState(false);
+            
+        const styles = {
+            listElement:(hovered)=>( {
+                width: "10%",
+                border: "1px solid black",
+                outline: hovered? "3px solid black":"none",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: "5px",
+                flexDirection: "column",
+                backgroundColor: hovered?"rgba(255, 250, 250, 1)":"rgba(200, 200, 200, 0.8)",
+            }),
+            hoverable: {
+                cursor: "pointer",
+                padding: "5px",
+                borderRadius: "5px",
+                margin:"10px",
+            },
+            
+            
+            image: {
+                marginTop: "10px",
+                padding:"-5px",
+                width: "calc(100% - 30px)",
+                aspectRatio: 1,
+            },
+            saplingName: {
+                fontSize: "22px",
+                textAlign: "center",
+                backgroundColor: "rgba(0, 125, 0, 0.5)",
+            },
+            saplingMoney:(hoverBool) =>({
+                backgroundColor: hoverBool?"green":"white",
+                color: hoverBool?"white": "green",
+                fontSize: "20px",
+                borderRadius: "5px",
+                padding: "2px",
+                border:"2px solid green",
+                transition: "background-color 0.3s ease, color 0.3s ease",
+            }),
+            reviewString: {
+                backgroundColor: "rgba(225, 130, 10, 0.6)",
+                border: "1px solid green",
+            },
+        };
+        const OnClick = () => {
+            navigate(`/Sapling/${sapling.slug}`)  
+        };
+        return (
+            <div style={styles.listElement(hovered)} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+            
+                onClick={() =>OnClick()}>
+                <img
+                    style={{ ...styles.hoverable,...styles.image,  outline: hoveredElement === "image" ? "2px solid green" : "none" }}
+                    src={sapling.imageUrl}
+                    alt={sapling.name}
+                    onMouseEnter={() => setHoveredElement("image")}
+                    onMouseLeave={() => setHoveredElement(null)}
+                />
+                <p
+                    style={{ ...styles.saplingName, ...styles.hoverable, outline: hoveredElement === "name" ? "2px solid green" : "none" }}
+                    onMouseEnter={() => setHoveredElement("name")}
+                    onMouseLeave={() => setHoveredElement(null)}
+                >
+                    {sapling.name}
+                </p>
+                <p
+                    style={styles.saplingMoney(hoveredElement === "money")}
+                    onMouseEnter={() => setHoveredElement("money")}
+                    onMouseLeave={() => setHoveredElement(null)}
+                >
+                    {getPriceRange(sapling)}
+                </p>
+                <p
+                    style={{ ...styles.reviewString, ...styles.hoverable, outline: hoveredElement === "review" ? "2px solid green" : "none" }}
+                    onMouseEnter={() => setHoveredElement("review")}
+                    onMouseLeave={() => setHoveredElement(null)}
+                >
+                    Detayları incele
+                </p>
+            </div>
+        );
+    };
+
     return (
 
 
         <div style={styles.content}>
-           
 
-            <h1 style={styles.PaddingWelcome}>Fidan Bahçemize Hoşgeldiniz</h1>
-            <h1 style={styles.CategoriesText}>Kategoriler</h1>
-            <div style={SharedStyles.ColumList}>
-                {saplingCategories.length > 0 ? (saplingCategories.map(category => (
-                    <div key={category.id} style={SharedStyles.columListElement}>
-                        <ImageWithHoverEffect category={category}/>
-                        <SaplingListContainer saplingList={category.saplingReadDtos}/>
 
-                    </div>))) : (<p>Resimler yükleniyor...</p>)}
+            {/*<h1 style={styles.PaddingWelcome}>Fidan Bahçemize Hoşgeldiniz</h1>*/}
+            {/*<h1 style={styles.CategoriesText}>Kategoriler</h1>*/}
+            <div style={styles.ColumList}>
+                {saplings.length > 0 ? (saplings.map(sapling => (
+                        // <div key={category.id} style={SharedStyles.columListElement}>
+                        //     <ImageWithHoverEffect category={category}/>
+                        //     <SaplingListContainer saplingList={category.saplingReadDtos}/>
+                        //
+                        // </div>))) 
+                        <HomeSapling sapling={sapling}/>)))
+                    : (<p>Resimler yükleniyor...</p>)}
 
             </div>
 
@@ -134,14 +243,24 @@ function HomePage() {
 }
 
 const styles = {
-    content:{
+    ColumList: {
+        width: "100%",
+        minWidth: "100px",
+        paddingTop: "30px",
+        maxHeight: "90vh",
+        justifyContent: "center",
+        gap: "3vh",
+        display: "flex",
+        flexDirection: "row",
+
+
+    },
+    content: {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
     },
-    Headera: {
-       
-    },
+    Headera: {},
     // Header: {
     //     display: "flex",
     //     justifyContent: "center",
@@ -166,17 +285,13 @@ const styles = {
     //
     //
     // },
-   
+
     CategoriesText: {
         textAlign: "center",
-    }, 
-    PaddingWelcome: {
-         textAlign: 'center'
     },
-
-
-   
-
+    PaddingWelcome: {
+        textAlign: 'center'
+    },
 
 
 };

@@ -3,23 +3,28 @@ import Header from "./Header";
 import Home from "./HomePage";
 import Saplings from "./Saplings";
 import Sapling from "./Sapling";
+import React from "react";
 
 
 function App() {
  
     return (
+
         <Router>
-            <div style={styles.page}>
-                <Header />
-                <div style={styles.content}>
+            <body style={styles.page}>
+                <header >
+                    <Header/>
+                </header>
+                <main style={styles.content}>
                     <Routes>
                         <Route path="/" element={<Home/>}/>
-                        <Route path="/Category/:categoryName" element={<Saplings/>}/>
-                        <Route path="/Sapling/:saplingReadDto" element={<Sapling/>}/>
+                        <Route path="/Category/:categorySlug" element={<Saplings/>}/>
+                        <Route path="/Sapling/:saplingSlug" element={<Sapling/>}/>
                     </Routes>
-                </div>
-            </div>
+                </main>
+            </body>
         </Router>
+
     );
 }
 const styles = {

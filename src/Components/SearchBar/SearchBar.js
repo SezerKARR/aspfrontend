@@ -72,6 +72,11 @@ function SearchBar({ placeholder = "Search...", rawData = [] }) {
     );
 }
 const styles = {
+    result:{
+      position: "absolute",  
+        width: "100%",
+        backgroundColor: "#fff",
+    },
     container: {
         width: "292px",
     },

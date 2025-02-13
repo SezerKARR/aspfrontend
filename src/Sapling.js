@@ -1,165 +1,196 @@
 import React, {useState, useRef, useEffect} from "react";
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import {useParams} from 'react-router-dom';
 import axios from "axios";
-import Magnifier from "./Magnifier";
+import GlassMagnifier from "./GlassMagnifier";
 
 function Sapling() {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const sapling = location.state?.sapling;
+    const [sapling, setSapling] = useState(null);
+    const [hoveredId, setHoveredId] = useState("");
 
-    const BigImages = ({ saplingHeights }) => {
+    const {saplingSlug} = useParams();
+    const [matureSaplings, setMatureSaplings] = useState([]);
+    const [youngSaplings, setYoungSaplings] = useState([]);
+    const [clickedImage, setClickedImage] = useState(null);
+    useEffect(() => {
+        console.log(youngSaplings);
+        setClickedImage(youngSaplings[0]);
+    }, [youngSaplings]);
+    useEffect(() => {
+        console.log(saplingSlug);
+
+        if (!saplingSlug) return;
+        console.log(encodeURIComponent(saplingSlug));
+        axios.get(`https://localhost:5000/api/Sapling/${encodeURIComponent(saplingSlug)}`)
+            .then(response => {
+                if (!response.data || response.data.length === 0) {
+                    throw new Error("Kategori bulunamadı");
+                }
+                setSapling(response.data);
+                hand(response.data);
+
+                // const filteredSaplings = sapling.saplingHeightReadDtos.map(height => ({
+                //     ...sapling,
+                //     firstValidSapling: sapling.saplingList.find(item => item.height > 0) || null
+                // }));
+                // console.log(sapling);
+
+            })
+
+            .catch(error => {
+                console.error("Veri yüklenirken hata oluştu:", error);
+            });
+    }, [saplingSlug]);
+
+    const hand = (data) => {
+        console.log(data);
+        const {zeroHeightSaplings, nonZeroHeightSaplings} = data.saplingHeightReadDtos
+            .reduce((acc, item) => {
+                if (item.height === 0) {
+                    acc.zeroHeightSaplings.push(item);
+                } else {
+                    acc.nonZeroHeightSaplings.push(item);
+                }
+                return acc;
+            }, {zeroHeightSaplings: [], nonZeroHeightSaplings: []});
+        console.log(zeroHeightSaplings, nonZeroHeightSaplings);
+// Küçükten büyüğe sıralama
+        setMatureSaplings(zeroHeightSaplings.sort((a, b) => a.height - b.height));
+        setYoungSaplings(nonZeroHeightSaplings.sort((a, b) => a.height - b.height));
+
+
+        return null;
+    }
+    const BigImage = () => {
         const [hoveredImageUrl, setHoveredImageUrl] = useState("");
-        const [hoveredId, setHoveredId] = useState(-1);
-        const [position, setPosition] = useState({ x: 0, y: 0 });
-        const imageRefs = useRef([]);
-        const hoverTimeoutRef = useRef(null);
-        const handleMouseEnter = ({ id, imageUrl }) => {
-            setHoveredId(id);
-            
-
-            setHoveredImageUrl(imageUrl);
-
-        };
-
-        const handleMouseMove = (e, id) => {
-            if (imageRefs.current[id]) {
-                const bounds = imageRefs.current[id].getBoundingClientRect();
-                const scaleFactor = 1.6; // Resmin büyüme faktörü
-
-                // Cursor'un büyütülmeden önceki konumunu hesapla
-                const originalX = (e.clientX - bounds.left);
-                const originalY = (e.clientY - bounds.top);
-
-                // Büyütülmüş resme uygun şekilde orantılı olarak pozisyonu hesapla
-                const scaledX = (originalX / bounds.width) * 100;
-                const scaledY = (originalY / bounds.height) * 100;
-
-                // Magnifier'ı büyütülmüş görsele göre yerleştir
-                const magnifierX = originalX - (110 * scaleFactor); // Magnifier'ın X konumu
-                const magnifierY = originalY - (80 * scaleFactor); // Magnifier'ın Y konumu
-
-                // Daha akıcı olması için requestAnimationFrame kullan
-                requestAnimationFrame(() => {
-                    setPosition({
-                        x: magnifierX, // Magnifier'ı cursor'un üzerine yerleştir
-                        y: magnifierY,
-                        backgroundPosition: `${scaledX}% ${scaledY}%`, // Büyütülmüş resmin arka planını doğru konumlandır
-                    });
-                });
-            }
-        };
+        const [position, setPosition] = useState({x: 0, y: 0});
+        const imageRef = useRef();
 
 
+        return (<div>
 
-
-
-
-        const handleMouseLeave = () => {
-            setHoveredImageUrl("");
-            setHoveredId(-1);
-        };
-
-        const addJust = (id) => {
-            let localScale = "scale(1.01)";
-
-            if (hoveredId === id) {
-                localScale = "scale(1.6)";
-            } else if (hoveredId === -1) {
-                localScale = "scale(1)";
-            } else {
-                localScale = "scale(0.7)";
-            }
-            return localScale;
-        };
-
-        const bigImages = saplingHeights.filter(item => item.height === 0);
-
-        const styleBigImages = {
-            containerStyle: {
-                width: "22%",
-                maxHeight: "10%",
-                borderRadius: "8px",
-                position: "relative",
-                cursor: "none",
-            },
-            ImageList: {
-                paddingTop: "20px",
-                alignItems: "center",
-                justifyContent: "center",
-                display: "flex",
-                flexDirection: "row",
-                gap: "3vh",
-            },
-            imageStyle: (localTransform) => ({
-                width: "600px",
-                maxWidth: "100%",
-                maxHeight: "20vh",
-                aspectRatio: "1/1",
-                transition: "transform 0.4s ease-in-out",
-                transform: localTransform,
-                transformOrigin: "center",
-                border: "2px solid rgba(0, 0, 0, 1)",
-                borderRadius: "8px",
-                boxSizing: "border-box",
-            }),
-        };
-
-        return (
-            <div style={styleBigImages.ImageList}>
-                {bigImages.length > 0 ? (
-                    bigImages.map((bigImage, index) => (
-                        <div
-                            style={styleBigImages.containerStyle}
-                            key={bigImage.id}
-                            onMouseEnter={() => handleMouseEnter({ id: index, imageUrl: bigImage.imageUrl })}
-                            onMouseMove={(e) => handleMouseMove(e, index)}
-                            onMouseLeave={handleMouseLeave}
-                        >
-                            <img
-                                src={bigImage.imageUrl}
-                                alt="Magnify"
-                                style={styleBigImages.imageStyle(addJust(index))}
-                                ref={(el) => (imageRefs.current[index] = el)}
-                            />
-                            {hoveredImageUrl && hoveredId === index && (
-                                <Magnifier hoveredImageUrl={hoveredImageUrl} position={position} />
-                            )}
-                        </div>
-                    ))
-                ) : (
-                    <p>Büyük resim yok</p>
-                )}
             </div>
+
         );
     };
 
-    return (
-        <div style={styles.container}>
-            <div style={styles.ColumList}>
-                <p style={styles.content}>Çit halinde fidanlarımız:</p>
-                <BigImages saplingHeights={sapling.saplingHeightReadDtos} />
-            </div>
+    const handleClick = (youngSapling) => {
+        setClickedImage(youngSapling)
+    }
+
+    return (<div style={styles.container}>
+            {matureSaplings && <MatureSaplings clickedImage={clickedImage} matureSaplings={matureSaplings} setClickedImage={setClickedImage}
+            />}
+            <MainContent setClickedImage={setClickedImage} clickedImage={clickedImage} youngSaplings={youngSaplings}/>
+           
+
+
         </div>
+
     );
 }
 
+const MatureSaplings = ({setClickedImage,clickedImage, matureSaplings}) => {
+    console.log(matureSaplings);
+    const stylesMatureSaplings = {
+        imgStyle: (id) => ({
+            outline: clickedImage != null ? id === clickedImage.id ? "2px solid rgba(0, 0, 0, 1)" : "none" : "none",
+            maxWidth: `${100 / (matureSaplings.length + 1)}%`,
+            maxHeight: "10vh",
+            cursor: "pointer",
+            borderRadius:"5px",
+            aspectRatio: "1.2/1",
+
+        })
+    }
+
+    return (<div style={styles.ColumList}>
+            {(matureSaplings.map(matureSapling => (
+                <img style={stylesMatureSaplings.imgStyle(matureSapling.id)} src={matureSapling.imageUrl}
+                     onClick={()=>setClickedImage(matureSapling)}
+                     alt={matureSapling.img}/>)))}
+
+        </div>
+
+
+    )
+
+};
+const MainContent = ({setClickedImage, clickedImage, youngSaplings}) => {
+
+    const stylesYoungSaplingsScreener = {
+        ContainerMiddle: {
+            border: "2px solid rgba(100, 250, 250, 0.61)",
+            backgroundColor: "rgba(20,90,50,0.5",
+            borderRadius: "15px",
+            height: "auto",
+            alignItems: "center",
+            gap: "10px",
+            display: "flex",
+            padding: "5px", // Optional
+        }, RowYoungImages: {
+
+            maxHeight: "31vh",
+            width: "10vh",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1px",
+            aspectRatio: "",
+            backgroundColor: "rgba(0, 0, 0, 0.3)",
+            padding: "0",
+            boxSizing: "border-box",
+            borderRadius: "8px",
+            overflowY: "scroll", // Kaydırma aktif olacak
+            overflowX: "hidden",
+        }, imgStyle: (id) => ({
+            cursor: "pointer",
+            border: clickedImage != null ? id === clickedImage.id ? "2px solid rgba(0, 0, 0, 1)" : "none" : "none",
+            borderRadius: "8px",
+            margin: "2px",
+            height: "100%",
+            aspectRatio: "1/1",
+            zIndex: 10,
+        }),
+    }
+
+    return (<div style={stylesYoungSaplingsScreener.ContainerMiddle}>
+            <div style={stylesYoungSaplingsScreener.RowYoungImages}>
+
+                {(youngSaplings.map(youngSapling => (
+
+                    <img onClick={() => setClickedImage(youngSapling)}
+                         style={stylesYoungSaplingsScreener.imgStyle((youngSapling.id))}
+                         src={youngSapling.imageUrl}
+                         alt={youngSapling.img}/>)))}
+
+                {/*{(matureSaplings.map(matureSapling => (*/}
+
+                {/*<img style={styles.imgStyle(matureSapling.id)} src={matureSapling.imageUrl} alt={matureSapling.img}/>)))}*/}
+
+
+            </div>
+            <div>  {clickedImage && <GlassMagnifier imgUrl={clickedImage.imageUrl} alt={clickedImage.imageUrl}/>} </div>
+        </div>
+
+    )
+
+};
 const styles = {
     content: {
-        fontWeight: "bold",
-        fontSize: "2vh",
-    },
-    container: {},
-    ColumList: {
-        maxHeight: "90vh",
-        justifyContent: "flex-start",
+        fontWeight: "bold", fontSize: "2vh",
+    }, container: {
+
+        display: "flex", flexDirection: "column  ", alignItems: "center", gap: "3vh",
+    }, ColumList: {
+        width: "80%",
+        justifyContent: "center",
         gap: "3vh",
-        alignItems: "flex-start",
+        alignItems: "center",
         flexWrap: "wrap",
         display: "flex",
         flexDirection: "row",
     },
+
+
 };
 
 export default Sapling;

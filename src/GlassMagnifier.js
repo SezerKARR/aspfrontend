@@ -1,111 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
-const GlassMagnifier = () => {
-    const [magnifierSize, setMagnifierSize] = useState(30); // default size 30%
-    const [borderSize, setBorderSize] = useState(5); // default border size 5
-    const [borderColor, setBorderColor] = useState('rgba(255, 255, 255, .5)'); // default border color
-    const [allowOverflow, setAllowOverflow] = useState(true); // default allow overflow
-    const [shape, setShape] = useState(''); // default shape: circle
+const GlassMagnifier = ({ imgUrl, zoomLevel = 3, size = 150 }) => {
+    const [backgroundPosition, setBackgroundPosition] = useState('0% 0%');
+    const [showMagnifier, setShowMagnifier] = useState(false);
+    const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+    const imgRef = useRef(null);
+
+    const handleMouseMove = (e) => {
+        const { left, top, width, height } = imgRef.current.getBoundingClientRect();
+        const x = e.clientX - left;
+        const y = e.clientY - top;
+
+        // Calculate the position of the magnifier
+        const xPos = x - size / 2;
+        const yPos = y - size / 2;
+
+        // Calculate the background position
+        const xPercentage = (x / width) * 100;
+        const yPercentage = (y / height) * 100;
+
+        setCursorPosition({ x: xPos, y: yPos });
+        setBackgroundPosition(`${xPercentage}% ${yPercentage}%`);
+    };
+
+    const containerStyle = {
+        
+        position: 'relative',
+        display: 'inline-block',
+        cursor: showMagnifier ? 'none' : '',
+    };
+
+    const imgStyle = {
+        border:'2px solid black' ,
+        display: 'block',
+        height: '100%',
+        aspectRatio:"1.5/1",
+    };
+
+    const magnifierStyle = {
+        cursor: 'none',
+        position: 'absolute',
+        width: `${size}px`,
+        height: `${size}px`,
+        backgroundImage: `url(${imgUrl})`,
+        backgroundPosition: backgroundPosition,
+        backgroundSize: `${imgRef.current?.width * zoomLevel}px ${imgRef.current?.height * zoomLevel}px`,
+        borderRadius: '50%',
+        border: '2px solid #fff',
+        boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+        pointerEvents: 'none',
+        left: `${cursorPosition.x}px`,
+        top: `${cursorPosition.y}px`,
+    };
 
     return (
-        <div className="example-container">
-            <h2>Glass Magnifier</h2>
-            <div className="flex">
-                <div className="input-position" style={{ position: 'relative', overflow: 'visible', userSelect: 'none', cursor: 'crosshair' }}>
-                    <img src="https://adamrisberg.github.io/react-image-magnifiers/4700d4cb26b14563be996aa5f0c53ca2.jpg" alt="" style={{ width: '100%', display: 'block', boxSizing: 'border-box', cursor: 'none' }} />
-                    <div
-                        style={{
-                            position: 'absolute',
-                            boxSizing: 'border-box',
-                            pointerEvents: 'none',
-                            width: `${magnifierSize * 2.064}px`, // scaling based on size
-                            height: `${magnifierSize * 2.064}px`, // scaling based on size
-                            top: '0px',
-                            left: '0px',
-                            visibility: 'hidden',
-                            borderRadius: shape === 'true' ? '0%' : '50%', // square or circle
-                            zIndex: 1,
-                            border: `${borderSize}px solid ${borderColor}`,
-                            transform: 'translate(570.3px, -17.6531px)',
-                            backgroundColor: 'rgba(225, 225, 225, 0.5)',
-                            backgroundClip: 'padding-box'
-                        }}
-                    >
-                        <img
-                            src="https://adamrisberg.github.io/react-image-magnifiers/4700d4cb26b14563be996aa5f0c53ca2.jpg"
-                            alt=""
-                            style={{
-                                position: 'absolute',
-                                boxSizing: 'border-box',
-                                display: 'block',
-                                top: '0px',
-                                left: '0px',
-                                transform: 'translate(-2105.36px, -181.698px)',
-                                zIndex: 1,
-                                visibility: 'hidden',
-                                width: 'auto'
-                            }}
-                        />
-                    </div>
-                </div>
-
-                <div className="controls">
-                    <div className="label-flex">
-                        <label className="label-left">
-                            Allow Overflow:
-                            <select value={allowOverflow} onChange={(e) => setAllowOverflow(e.target.value === 'true')}>
-                                <option value="false">false</option>
-                                <option value="true">true</option>
-                            </select>
-                        </label>
-                        <label className="label-right">
-                            Shape:
-                            <select value={shape} onChange={(e) => setShape(e.target.value)}>
-                                <option value="">Circle</option>
-                                <option value="true">Square</option>
-                            </select>
-                        </label>
-                    </div>
-                    <div className="label-flex">
-                        <label className="label-left">
-                            Magnifier Size:
-                            <select value={magnifierSize} onChange={(e) => setMagnifierSize(Number(e.target.value))}>
-                                <option value="15">15%</option>
-                                <option value="20">20%</option>
-                                <option value="25">25%</option>
-                                <option value="30">30%</option>
-                                <option value="35">35%</option>
-                                <option value="40">40%</option>
-                                <option value="45">45%</option>
-                                <option value="50">50%</option>
-                            </select>
-                        </label>
-                        <label className="label-right">
-                            Border Size:
-                            <select value={borderSize} onChange={(e) => setBorderSize(Number(e.target.value))}>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                                <option value="7">7</option>
-                                <option value="8">8</option>
-                                <option value="9">9</option>
-                                <option value="10">10</option>
-                            </select>
-                        </label>
-                    </div>
-                    <label className="label">
-                        Border Color: <span className="note">(Use valid CSS color)</span>
-                        <input
-                            type="text"
-                            value={borderColor}
-                            onChange={(e) => setBorderColor(e.target.value)}
-                        />
-                    </label>
-                </div>
-            </div>
+        <div
+            style={containerStyle}
+            onMouseEnter={() => setShowMagnifier(true)}
+            onMouseLeave={() => setShowMagnifier(false)}
+            onMouseMove={handleMouseMove}
+        >
+            <img
+                ref={imgRef}
+                src={imgUrl}
+                alt="Magnified"
+                style={imgStyle}
+            />
+            {showMagnifier && <div style={magnifierStyle} />}
         </div>
     );
 };

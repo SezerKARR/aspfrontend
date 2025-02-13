@@ -11,28 +11,27 @@ function Saplings() {
     const location = useLocation();
     const [category, setCategory] = useState(null);
     const [saplings, setSaplings] = useState([]);
-    const { categoryName } = useParams();
+    const { categorySlug } = useParams();
     useEffect(() => {
-        if (!categoryName) return;  // Eğer kategori adı yoksa işlemi durdur
-
+        if (!categorySlug) return;  // Eğer kategori adı yoksa işlemi durdur
+        console.log(encodeURIComponent(categorySlug));
         // 1️⃣ Kategori bilgilerini al
-        axios.get(`https://localhost:5000/api/SaplingCategory?name=${encodeURIComponent(categoryName)}`)
+        axios.get(`https://localhost:5000/api/SaplingCategory/${encodeURIComponent(categorySlug)}`)
             .then(response => {
                 if (!response.data || response.data.length === 0) {
                     throw new Error("Kategori bulunamadı");
                 }
+                
                 setCategory(response.data);  // Gelen kategoriyi kaydet
-
+                setSaplings(response.data.saplingReadDtos);
                 // 2️⃣ Kategori ID'sine göre saplingleri al
-                return axios.get(`https://localhost:5000/api/sapling?Id=${response.data.id}`);
+                
             })
-            .then(response => {
-                setSaplings(response.data);  // Sapling listesini kaydet
-            })
+            
             .catch(error => {
                 console.error("Veri yüklenirken hata oluştu:", error);
             });
-    }, [categoryName]);
+    }, [categorySlug]);
 
     const ImageWithHoverEffect = ({saplingReadDto}) => {
         const [hovered, setHovered] = useState(false);
@@ -42,7 +41,7 @@ function Saplings() {
                 style={SharedStyles.ImageAndNameContainer}
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
-                onClick={() => navigate(`/Sapling/${saplingReadDto.name}`, {state: {sapling: saplingReadDto}})}
+                onClick={() => navigate(`/Sapling/${saplingReadDto.slug}`, {state: {sapling: saplingReadDto}})}
             >
                 <img src={saplingReadDto.imageUrl} alt="saplingReadDtos" style={SharedStyles.image(hovered)} />
                 <div style={SharedStyles.textOverlay(hovered)}>{saplingReadDto.name}</div>

@@ -1,11 +1,11 @@
-function Logo() {
+function CardString() {
     return (
         <div style={styles.container}>
             <img style={styles.cardImage}
                  src={"https://us.123rf.com/450wm/aguiters/aguiters1710/aguiters171000013/88108656-al%C4%B1%C5%9Fveri%C5%9F-sepeti-simgesi-vekt%C3%B6r.jpg?ver=6"}
                  style={styles.CardImg} alt={"logo"}/>
             <p style={styles.String}>Sepetim:</p>
-            <p style={styles.String}>0.0tl</p>
+            <p style={styles.String}>0.0 tl</p>
         </div>
     )
 
@@ -33,4 +33,4 @@ const styles = {
 
 
 }
-export default Logo;
+export default CardString;

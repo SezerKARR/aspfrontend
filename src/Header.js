@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Logo from "./Components/Logo/Logo";
 import SearchBar from "./Components/SearchBar/SearchBar";
-import Card from "./Components/Card/Card";
+import CardString from "./Components/Card/CardString";
 import Categories from "./Components/Categories";
 
 // Dinamik bir Header bileşeni oluşturuyoruz
@@ -41,7 +41,7 @@ const Header = () => {
 
                 <div style={styles.LogoWrapper}><Logo/></div>
                 <div style={styles.SearchBarWrapper}><SearchBar placeholder="Search fruits..." rawData={data}/></div>
-                <div><Card/></div>
+                <div><CardString/></div>
             </div>
             <div style={styles.Bottom}>
                 <Categories/>
