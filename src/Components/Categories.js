@@ -9,7 +9,7 @@ function Categories(){
         setHoveredLink(link);
     };
     useEffect(() => {
-        axios.get("https://localhost:5000/api/SaplingCategory/")
+        axios.get("https://saplingstore-u189.onrender.com/api/SaplingCategory/")
             .then(response => {
                 setSaplingCategories(response.data);
                 console.log(response.data);

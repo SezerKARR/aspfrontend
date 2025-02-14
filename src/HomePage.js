@@ -13,12 +13,12 @@ function HomePage() {
     const [saplingCategories, setSaplingCategories] = useState([]);
     const [saplings, setSaplings] = useState([]);
     useEffect(() => {
-        axios.get("https://localhost:5000/api/SaplingCategory/")
+        axios.get("https://saplingstore-u189.onrender.com/SaplingCategory/")
             .then(response => {
                 setSaplingCategories(response.data);
             })
             .catch(Error => console.error("Error:", Error));
-        axios.get("https://localhost:5000/api/Sapling/")
+        axios.get("https://saplingstore-u189.onrender.com/api/Sapling/")
             .then(response => {
                 console.log(response.data);
                 setSaplings(response.data);
@@ -27,7 +27,7 @@ function HomePage() {
     const handleCategoryClick = (category) => {
         console.log(category);
         // Kategoriye tıklandığında, o kategoriye ait sapling ID'lerini alıyoruz
-        axios.get(`https://localhost:5000/api/SaplingCategory/${category.id}`)
+        axios.get(`https://saplingstore-u189.onrender.com/SaplingCategory/${category.id}`)
             .then(response => {
                 console.log(response.data);
                 const saplingIds = response.data.saplingReadDtos.map(sapling => sapling.id); // Sapling ID'lerini alıyoruz
@@ -54,67 +54,68 @@ function HomePage() {
             <div style={SharedStyles.textOverlay(hovered)}>{category.name}</div>
         </div>);
     };
-    const SaplingListContainer = ({saplingList}) => {
-        const [hovered, setHovered] = useState(false);
-
-        const styles = {
-            saplingList: {
-                padding: "0", // Varsayılan padding'i kaldır
-                margin: "0",
-                height: "auto", // Yüksekliği içerik kadar olsun
-                justifyContent: "center",
-                listStyleType: "none",
-                // İçeriğe göre genişlik otomatik ayarlanacak
-                maxWidth: "100%",
-                width: "auto", // Maksimum genişlik %100 olacak
-                gap: "24px",
-                textAlign: "center",
-                flexWrap: "wrap", // Sığmazsa alt satıra geçer
-                borderRadius: "5px",
-                display: "flex",
-                paddingTop: "10px",
-                paddingBottom: "10px",
-                backgroundColor: hovered ? "rgba(200,125,150,0.8)" : "rgba(200, 125, 150, 0.5)", // Arka plan rengi
-            },
-
-
-        }
-        return (
-            <ul style={styles.saplingList}
-                onMouseEnter={() => setHovered(true)}
-                onMouseLeave={() => setHovered(false)}>
-                {saplingList.map(sapling => (<SaplingTextWithHoverEffect sapling={sapling}/>))}
-            </ul>)
-    }
-    const SaplingTextWithHoverEffect = ({sapling}) => {
-        const [hovered, setHovered] = useState(false);
-
-        const styles = {
-
-            saplingsName: {
-                cursor: "pointer",
-                paddingLeft: "10px",
-                paddingRight: "10px",
-                paddingBottom: "2px",
-                backgroundColor: hovered ? "rgba(150, 255, 255, 1)" : "rgba(250, 255, 255, 0.6)",
-                borderRadius: "15px",
-                fontSize: "24px",
-                color: hovered ? "rgba(120, 0, 0, 1)" : "rgba(50,0,0, 1)",
-                fontWeight: "bold",
-            },
-        };
-
-        return (<div
-                style={styles.container}
-                onMouseEnter={() => setHovered(true)}
-                onMouseLeave={() => setHovered(false)}
-                onClick={() => navigate(`/Sapling/${sapling.slug}`, {state: {saplingId: sapling.id}})}
-            >
-                <li key={sapling.id} style={styles.saplingsName}>{sapling.name}</li>
-            </div>
-
-        );
-    };
+    // const SaplingListContainer = ({saplingList}) => {
+    //     const [hovered, setHovered] = useState(false);
+    //
+    //     const styles = {
+    //         saplingList: {
+    //             padding: "0", // Varsayılan padding'i kaldır
+    //             margin: "0",
+    //             height: "auto", // Yüksekliği içerik kadar olsun
+    //             justifyContent: "center",
+    //             listStyleType: "none",
+    //             // İçeriğe göre genişlik otomatik ayarlanacak
+    //             maxWidth: "100%",
+    //             width: "auto", // Maksimum genişlik %100 olacak
+    //             gap: "24px",
+    //             textAlign: "center",
+    //             flexWrap: "wrap", // Sığmazsa alt satıra geçer
+    //             borderRadius: "5px",
+    //             display: "flex",
+    //             paddingTop: "10px",
+    //             paddingBottom: "10px",
+    //             backgroundColor: hovered ? "rgba(200,125,150,0.8)" : "rgba(200, 125, 150, 0.5)", // Arka plan rengi
+    //         },
+    //
+    //
+    //     }
+    //     return (
+    //         <ul style={styles.saplingList}
+    //             onMouseEnter={() => setHovered(true)}
+    //             onMouseLeave={() => setHovered(false)}>
+    //             {saplingList.map(sapling => (<SaplingTextWithHoverEffect sapling={sapling}/>))}
+    //         </ul>)
+    // }
+    
+    // const SaplingTextWithHoverEffect = ({sapling}) => {
+    //     const [hovered, setHovered] = useState(false);
+    //
+    //     const styles = {
+    //
+    //         saplingsName: {
+    //             cursor: "pointer",
+    //             paddingLeft: "10px",
+    //             paddingRight: "10px",
+    //             paddingBottom: "2px",
+    //             backgroundColor: hovered ? "rgba(150, 255, 255, 1)" : "rgba(250, 255, 255, 0.6)",
+    //             borderRadius: "15px",
+    //             fontSize: "24px",
+    //             color: hovered ? "rgba(120, 0, 0, 1)" : "rgba(50,0,0, 1)",
+    //             fontWeight: "bold",
+    //         },
+    //     };
+    //
+    //     return (<div
+    //             style={styles.container}
+    //             onMouseEnter={() => setHovered(true)}
+    //             onMouseLeave={() => setHovered(false)}
+    //             onClick={() => navigate(`/Sapling/${sapling.slug}`, {state: {saplingId: sapling.id}})}
+    //         >
+    //             <li key={sapling.id} style={styles.saplingsName}>{sapling.name}</li>
+    //         </div>
+    //
+    //     );
+    // };
     const getPriceRange = (sapling) => {
         console.log(sapling);
         if (!sapling.saplingHeightReadDtos || sapling.saplingHeightReadDtos.length === 0) {
@@ -137,6 +138,7 @@ function HomePage() {
         const styles = {
             listElement:(hovered)=>( {
                 width: "10%",
+                minWidth: "200px",
                 border: "1px solid black",
                 outline: hovered? "3px solid black":"none",
                 display: "flex",

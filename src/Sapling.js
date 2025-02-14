@@ -2,6 +2,7 @@ import React, {useState, useRef, useEffect} from "react";
 import {useParams} from 'react-router-dom';
 import axios from "axios";
 import GlassMagnifier from "./GlassMagnifier";
+import saplings from "./Saplings";
 
 function Sapling() {
     const [sapling, setSapling] = useState(null);
@@ -53,35 +54,49 @@ function Sapling() {
                 return acc;
             }, {zeroHeightSaplings: [], nonZeroHeightSaplings: []});
         console.log(zeroHeightSaplings, nonZeroHeightSaplings);
-// Küçükten büyüğe sıralama
         setMatureSaplings(zeroHeightSaplings.sort((a, b) => a.height - b.height));
         setYoungSaplings(nonZeroHeightSaplings.sort((a, b) => a.height - b.height));
 
 
         return null;
     }
-    const BigImage = () => {
-        const [hoveredImageUrl, setHoveredImageUrl] = useState("");
-        const [position, setPosition] = useState({x: 0, y: 0});
-        const imageRef = useRef();
-
-
-        return (<div>
-
-            </div>
-
-        );
-    };
-
-    const handleClick = (youngSapling) => {
-        setClickedImage(youngSapling)
+    //
+    // const handleClick = (youngSapling) => {
+    //     setClickedImage(youngSapling)
+    // }
+   
+    const IsHovered=(id)=>{
+        if(!clickedImage)return false;
+        return id === clickedImage.id;
+        
     }
-
     return (<div style={styles.container}>
-            {matureSaplings && <MatureSaplings clickedImage={clickedImage} matureSaplings={matureSaplings} setClickedImage={setClickedImage}
-            />}
-            <MainContent setClickedImage={setClickedImage} clickedImage={clickedImage} youngSaplings={youngSaplings}/>
-           
+            {matureSaplings && <div style={styles.ColumList}>
+                {(matureSaplings.map(matureSapling => (
+                    <img style={styles.matureImg(IsHovered(matureSapling.id),matureSaplings.length)} src={matureSapling.imageUrl}
+                         onClick={() => setClickedImage(matureSapling)}
+                         alt={matureSapling.img}/>)))}
+
+            </div>}
+
+            <div style={styles.ContainerMiddle}>
+                <div style={styles.RowYoungImages}>
+
+                    {(youngSaplings.map(youngSapling => (
+
+                        <img onClick={() => setClickedImage(youngSapling)}
+                             style={styles.youngImg(IsHovered(youngSapling.id))}
+                             src={youngSapling.imageUrl}
+                             alt={youngSapling.img}/>)))}
+
+                    {/*{(matureSaplings.map(matureSapling => (*/}
+
+                    {/*<img style={styles.imgStyle(matureSapling.id)} src={matureSapling.imageUrl} alt={matureSapling.img}/>)))}*/}
+                </div>
+                <div>  {clickedImage &&
+                    <GlassMagnifier imgUrl={clickedImage.imageUrl} alt={clickedImage.imageUrl}/>} </div>
+                <HeightDescription clickedImage={clickedImage} sapling={sapling}/>
+            </div>
 
 
         </div>
@@ -89,92 +104,80 @@ function Sapling() {
     );
 }
 
-const MatureSaplings = ({setClickedImage,clickedImage, matureSaplings}) => {
-    console.log(matureSaplings);
-    const stylesMatureSaplings = {
-        imgStyle: (id) => ({
-            outline: clickedImage != null ? id === clickedImage.id ? "2px solid rgba(0, 0, 0, 1)" : "none" : "none",
-            maxWidth: `${100 / (matureSaplings.length + 1)}%`,
-            maxHeight: "10vh",
-            cursor: "pointer",
-            borderRadius:"5px",
-            aspectRatio: "1.2/1",
 
-        })
-    }
-
-    return (<div style={styles.ColumList}>
-            {(matureSaplings.map(matureSapling => (
-                <img style={stylesMatureSaplings.imgStyle(matureSapling.id)} src={matureSapling.imageUrl}
-                     onClick={()=>setClickedImage(matureSapling)}
-                     alt={matureSapling.img}/>)))}
-
-        </div>
-
-
-    )
-
-};
-const MainContent = ({setClickedImage, clickedImage, youngSaplings}) => {
-
-    const stylesYoungSaplingsScreener = {
-        ContainerMiddle: {
-            border: "2px solid rgba(100, 250, 250, 0.61)",
-            backgroundColor: "rgba(20,90,50,0.5",
-            borderRadius: "15px",
-            height: "auto",
-            alignItems: "center",
-            gap: "10px",
-            display: "flex",
-            padding: "5px", // Optional
-        }, RowYoungImages: {
-
-            maxHeight: "31vh",
-            width: "10vh",
+// const MainContent = ({setClickedImage, clickedImage, youngSaplings}) => {
+//
+//   
+//
+//     return (
+//        
+//
+//     )
+//
+// };
+const HeightDescription = ({clickedImage,sapling}) => {
+    const stylesHeightDescription = {
+        columnDescription: {
             display: "flex",
             flexDirection: "column",
-            gap: "1px",
-            aspectRatio: "",
-            backgroundColor: "rgba(0, 0, 0, 0.3)",
-            padding: "0",
-            boxSizing: "border-box",
-            borderRadius: "8px",
-            overflowY: "scroll", // Kaydırma aktif olacak
-            overflowX: "hidden",
-        }, imgStyle: (id) => ({
-            cursor: "pointer",
-            border: clickedImage != null ? id === clickedImage.id ? "2px solid rgba(0, 0, 0, 1)" : "none" : "none",
-            borderRadius: "8px",
-            margin: "2px",
-            height: "100%",
-            aspectRatio: "1/1",
-            zIndex: 10,
-        }),
+            backgroundColor: "rgba(250,215,200,0.6)",
+            padding: "10px",
+            borderRadius: "15px",
+        },
+        nameString: {}, DescriptionString: {},
+        moneyString: {color:"green"}
+
     }
-
-    return (<div style={stylesYoungSaplingsScreener.ContainerMiddle}>
-            <div style={stylesYoungSaplingsScreener.RowYoungImages}>
-
-                {(youngSaplings.map(youngSapling => (
-
-                    <img onClick={() => setClickedImage(youngSapling)}
-                         style={stylesYoungSaplingsScreener.imgStyle((youngSapling.id))}
-                         src={youngSapling.imageUrl}
-                         alt={youngSapling.img}/>)))}
-
-                {/*{(matureSaplings.map(matureSapling => (*/}
-
-                {/*<img style={styles.imgStyle(matureSapling.id)} src={matureSapling.imageUrl} alt={matureSapling.img}/>)))}*/}
-
-
-            </div>
-            <div>  {clickedImage && <GlassMagnifier imgUrl={clickedImage.imageUrl} alt={clickedImage.imageUrl}/>} </div>
+    return (
+        <div style={stylesHeightDescription.columnDescription}>
+            <h1 style={stylesHeightDescription.nameString} key={"Name"}>{sapling.name} </h1>
+            <p style={stylesHeightDescription.DescriptionString} key={"dsc"}>{sapling.description}</p>
+            <p style={stylesHeightDescription.moneyString} key={"dsc"}>{clickedImage.saplingMoney}TL</p>
         </div>
-
     )
 
-};
+}
 const styles = {
+    ContainerMiddle: {
+        border: "2px solid rgba(100, 250, 250, 0.61)",
+        backgroundColor: "rgba(20,90,50,0.5",
+        borderRadius: "15px",
+        height: "auto",
+        alignItems: "center",
+        gap: "10px",
+        display: "flex",
+        padding: "5px", // Optional
+    }, RowYoungImages: {
+
+        maxHeight: "31vh",
+        width: "10vh",
+        display: "flex",
+        flexDirection: "column",
+        gap: "1px",
+        aspectRatio: "",
+        backgroundColor: "rgba(0, 0, 0, 0.3)",
+        padding: "0",
+        boxSizing: "border-box",
+        borderRadius: "8px",
+        overflowY: "scroll", // Kaydırma aktif olacak
+        overflowX: "hidden",
+    }, youngImg: (hovered) => ({
+        cursor: "pointer",
+        border: hovered ? "2px solid rgba(0, 0, 0, 1)" : "none",
+        borderRadius: "8px",
+        margin: "2px",
+        height: "100%",
+        aspectRatio: "1/1",
+        zIndex: 10,
+    }), matureImg: (hovered,lenght) => ({
+        outline: hovered ? "2px solid rgba(0, 0, 0, 1)" : "none",
+        maxWidth: `${100 / (lenght + 1)}%`,
+        maxHeight: "10vh",
+        cursor: "pointer",
+        borderRadius: "5px",
+        aspectRatio: "1.2/1",
+
+    }),
     content: {
         fontWeight: "bold", fontSize: "2vh",
     }, container: {
