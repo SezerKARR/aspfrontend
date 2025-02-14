@@ -21,7 +21,7 @@ function Sapling() {
 
         if (!saplingSlug) return;
         console.log(encodeURIComponent(saplingSlug));
-        axios.get(`https://localhost:5000/api/Sapling/${encodeURIComponent(saplingSlug)}`)
+        axios.get(`https://saplingstore-u189.onrender.com/api/Sapling/${encodeURIComponent(saplingSlug)}`)
             .then(response => {
                 if (!response.data || response.data.length === 0) {
                     throw new Error("Kategori bulunamadı");
