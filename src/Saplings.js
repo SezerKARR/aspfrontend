@@ -16,7 +16,7 @@ function Saplings() {
         if (!categorySlug) return;  // Eğer kategori adı yoksa işlemi durdur
         console.log(encodeURIComponent(categorySlug));
         // 1️⃣ Kategori bilgilerini al
-        axios.get(`https://localhost:5000/api/SaplingCategory/${encodeURIComponent(categorySlug)}`)
+        axios.get(`https://saplingstore-u189.onrender.com/api/SaplingCategory/${encodeURIComponent(categorySlug)}`)
             .then(response => {
                 if (!response.data || response.data.length === 0) {
                     throw new Error("Kategori bulunamadı");
