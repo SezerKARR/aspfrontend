@@ -26,7 +26,6 @@ function Sapling() {
                 if (!response.data || response.data.length === 0) {
                     throw new Error("Kategori bulunamadı");
                 }
-                setSapling(response.data);
                 hand(response.data);
 
                 // const filteredSaplings = sapling.saplingHeightReadDtos.map(height => ({
@@ -43,6 +42,8 @@ function Sapling() {
     }, [saplingSlug]);
 
     const hand = (data) => {
+        setSapling(data);
+        
         console.log(data);
         const {zeroHeightSaplings, nonZeroHeightSaplings} = data.saplingHeightReadDtos
             .reduce((acc, item) => {
@@ -95,7 +96,10 @@ function Sapling() {
                 </div>
                 <div>  {clickedImage &&
                     <GlassMagnifier imgUrl={clickedImage.imageUrl} alt={clickedImage.imageUrl}/>} </div>
-                <HeightDescription clickedImage={clickedImage} sapling={sapling}/>
+                {sapling && clickedImage && (
+                    <HeightDescription clickedImage={clickedImage} sapling={sapling} />
+                )}
+
             </div>
 
 
@@ -128,6 +132,7 @@ const HeightDescription = ({clickedImage,sapling}) => {
         moneyString: {color:"green"}
 
     }
+    console.log(sapling);
     return (
         <div style={stylesHeightDescription.columnDescription}>
             <h1 style={stylesHeightDescription.nameString} key={"Name"}>{sapling.name} </h1>
